@@ -60,6 +60,57 @@ def startup_animation():
     print()
 
 
+def game_over_animation(secret):
+    """Display a dramatic GAME OVER animation and reveal the secret number."""
+    banner = r"""
+   ____    _    __  __ _____    _____     _______ ____
+  / ___|  / \  |  \/  | ____|  / _ \ \   / / ____|  _ \
+ | |  _  / _ \ | |\/| |  _|   | | | \ \ / /|  _| | |_) |
+ | |_| |/ ___ \| |  | | |___  | |_| |\ V / | |___|  _ <
+  \____/_/   \_\_|  |_|_____|  \___/  \_/  |_____|_| \_\
+"""
+    separators = ["💀  💀  💀  💀  💀  💀  💀  💀  💀  💀  💀  💀", "~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~"]
+
+    print()
+    # Flash the banner character by character
+    for char in banner:
+        print(char, end='', flush=True)
+        time.sleep(0.008)
+
+    time.sleep(0.3)
+
+    # Animated skull separator
+    for char in separators[0]:
+        print(char, end='', flush=True)
+        time.sleep(0.04)
+    print()
+
+    # Reveal the secret number dramatically
+    reveal = f"\n   💣  The secret number was: {secret}  💣"
+    print()
+    for char in reveal:
+        print(char, end='', flush=True)
+        time.sleep(0.07)
+    print()
+
+    time.sleep(0.4)
+
+    # Closing separator
+    for char in separators[1]:
+        print(char, end='', flush=True)
+        time.sleep(0.04)
+    print()
+
+    # Dramatic pause then encouragement
+    time.sleep(0.5)
+    msg = "  😢  Better luck next time!"
+    for char in msg:
+        print(char, end='', flush=True)
+        time.sleep(0.06)
+    print("\n")
+    time.sleep(0.4)
+
+
 def choose_difficulty():
     """Prompt the player to select a difficulty level.
 
@@ -118,7 +169,7 @@ def play_round():
         else:
             print("Too high.")
 
-    print(f"Out of guesses! The number was {secret}.")
+    game_over_animation(secret)
     return False, None
 
 

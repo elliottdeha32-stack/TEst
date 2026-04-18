@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slutsky Equation Playground</title>
+  <style>
+    /* ── Reset & base ────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f172a; --surface: #1e293b; --border: #334155;
+      --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8;
+      --sub: #f472b6; --inc: #a78bfa; --total: #34d399;
+      --budget-old: #64748b; --budget-new: #facc15;
+      --budget-comp: #fb923c; --ic-old: #818cf8; --ic-new: #22d3ee;
+      --radius: 10px;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6;
+      min-height: 100vh; padding: 1.5rem;
+    }
+    h1, h2, h3 { font-weight: 700; }
+    a { color: var(--accent); }
+
+    /* ── Layout ──────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { text-align: center; padding: 2rem 0 1rem; }
+    header h1 { font-size: 2rem; color: var(--accent); }
+    header p { color: var(--muted); max-width: 700px; margin: .5rem auto 0; }
+
+    .grid {
+      display: grid; gap: 1.5rem;
+      grid-template-columns: 340px 1fr;
+    }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+    /* ── Cards ────────────────────────────────────────────── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem;
+    }
+    .card h2 { font-size: 1.1rem; margin-bottom: .75rem; color: var(--accent); }
+
+    /* ── Controls ─────────────────────────────────────────── */
+    .control { margin-bottom: 1rem; }
+    .control label {
+      display: flex; justify-content: space-between; font-size: .85rem;
+      color: var(--muted); margin-bottom: .25rem;
+    }
+    .control label span { color: var(--text); font-weight: 600; }
+    input[type=range] {
+      -webkit-appearance: none; width: 100%; height: 6px;
+      background: var(--border); border-radius: 3px; outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 18px; height: 18px;
+      background: var(--accent); border-radius: 50%; cursor: pointer;
+    }
+
+    /* ── Canvas ───────────────────────────────────────────── */
+    canvas { width: 100%; border-radius: var(--radius); background: #0b1120; }
+
+    /* ── Equation bar ─────────────────────────────────────── */
+    .equation-bar {
+      display: flex; flex-wrap: wrap; gap: .75rem; align-items: center;
+      justify-content: center; padding: 1rem; font-size: 1.05rem;
+      font-family: 'Cambria Math', 'Latin Modern Math', serif;
+    }
+    .eq-total { color: var(--total); font-weight: 700; }
+    .eq-sub   { color: var(--sub); font-weight: 700; }
+    .eq-inc   { color: var(--inc); font-weight: 700; }
+    .eq-sym   { color: var(--muted); }
+
+    /* ── Decomposition readout ────────────────────────────── */
+    .readout { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .75rem; }
+    .readout .item {
+      text-align: center; padding: .6rem; border-radius: var(--radius);
+      background: #0f172a; border: 1px solid var(--border);
+    }
+    .readout .item .val { font-size: 1.3rem; font-weight: 700; }
+    .readout .item .lbl { font-size: .75rem; color: var(--muted); }
+    .readout .item.total .val { color: var(--total); }
+    .readout .item.sub   .val { color: var(--sub); }
+    .readout .item.inc   .val { color: var(--inc); }
+
+    /* ── Legend ───────────────────────────────────────────── */
+    .legend { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .75rem; font-size: .8rem; }
+    .legend span { display: flex; align-items: center; gap: .35rem; }
+    .legend i {
+      display: inline-block; width: 14px; height: 14px; border-radius: 3px;
+    }
+
+    /* ── Theory section ───────────────────────────────────── */
+    .theory { margin-top: 1.5rem; }
+    .theory h2 { font-size: 1.25rem; margin-bottom: .75rem; }
+    .theory p { color: var(--muted); margin-bottom: .75rem; }
+    .theory .formula {
+      font-family: 'Cambria Math', 'Latin Modern Math', serif;
+      font-size: 1.15rem; text-align: center; padding: 1rem;
+      background: #0b1120; border-radius: var(--radius); color: var(--text);
+      margin-bottom: 1rem; border: 1px solid var(--border);
+    }
+    details { margin-bottom: 1rem; }
+    details summary {
+      cursor: pointer; color: var(--accent); font-weight: 600;
+      margin-bottom: .5rem;
+    }
+    details p, details ul { color: var(--muted); }
+    details ul { padding-left: 1.25rem; }
+    details li { margin-bottom: .35rem; }
+
+    /* ── Preset buttons ───────────────────────────────────── */
+    .presets { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+    .presets button {
+      padding: .4rem .75rem; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); border-radius: 6px;
+      cursor: pointer; font-size: .82rem; transition: .15s;
+    }
+    .presets button:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    footer {
+      text-align: center; padding: 2rem 0 1rem; color: var(--muted);
+      font-size: .8rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══════════════ Header ═══════════════ -->
+  <header>
+    <h1>📊 Slutsky Equation Playground</h1>
+    <p>Explore how a price change decomposes into <strong style="color:var(--sub)">substitution</strong> and <strong style="color:var(--inc)">income</strong> effects. Drag the sliders and watch the graph update in real time.</p>
+  </header>
+
+  <!-- ═══════════════ Equation Bar ═══════════════ -->
+  <div class="card equation-bar" id="eqBar">
+    <span class="eq-sym">Δx</span>
+    <span class="eq-sym">=</span>
+    <span class="eq-sub">Δx<sub>sub</sub></span>
+    <span class="eq-sym">+</span>
+    <span class="eq-inc">Δx<sub>inc</sub></span>
+    <span class="eq-sym" style="margin-left:.5rem">│</span>
+    <span class="eq-total" id="eqTotal">Total: —</span>
+    <span class="eq-sym">=</span>
+    <span class="eq-sub" id="eqSub">Sub: —</span>
+    <span class="eq-sym">+</span>
+    <span class="eq-inc" id="eqInc">Inc: —</span>
+  </div>
+
+  <!-- ═══════════════ Main grid ═══════════════ -->
+  <div class="grid">
+
+    <!-- ── Left: Controls ── -->
+    <div>
+      <div class="card">
+        <h2>⚙️ Parameters</h2>
+
+        <div class="control">
+          <label>Income (m) <span id="vIncome">100</span></label>
+          <input type="range" id="sIncome" min="40" max="200" value="100" step="1" />
+        </div>
+        <div class="control">
+          <label>Price of x (p₁) <span id="vPx">2</span></label>
+          <input type="range" id="sPx" min="0.5" max="8" value="2" step="0.1" />
+        </div>
+        <div class="control">
+          <label>New price of x (p₁') <span id="vPxNew">4</span></label>
+          <input type="range" id="sPxNew" min="0.5" max="8" value="4" step="0.1" />
+        </div>
+        <div class="control">
+          <label>Price of y (p₂) <span id="vPy">2</span></label>
+          <input type="range" id="sPy" min="0.5" max="8" value="2" step="0.1" />
+        </div>
+        <div class="control">
+          <label>Preference α <span id="vAlpha">0.50</span></label>
+          <input type="range" id="sAlpha" min="0.10" max="0.90" value="0.50" step="0.01" />
+        </div>
+
+        <h2 style="margin-top:1rem;">🎯 Presets</h2>
+        <div class="presets">
+          <button data-preset="normal">Normal good</button>
+          <button data-preset="inferior">Inferior-like</button>
+          <button data-preset="big-drop">Big price drop</button>
+          <button data-preset="luxury">Luxury bias</button>
+          <button data-preset="necessity">Necessity bias</button>
+        </div>
+      </div>
+
+      <!-- Readout -->
+      <div class="card" style="margin-top:1rem;">
+        <h2>📐 Decomposition</h2>
+        <div class="readout">
+          <div class="item total">
+            <div class="val" id="rTotal">—</div>
+            <div class="lbl">Total Δx</div>
+          </div>
+          <div class="item sub">
+            <div class="val" id="rSub">—</div>
+            <div class="lbl">Substitution</div>
+          </div>
+          <div class="item inc">
+            <div class="val" id="rInc">—</div>
+            <div class="lbl">Income</div>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--budget-old)"></i> Original budget</span>
+          <span><i style="background:var(--budget-new)"></i> New budget</span>
+          <span><i style="background:var(--budget-comp)"></i> Compensated budget</span>
+          <span><i style="background:var(--ic-old)"></i> Original IC</span>
+          <span><i style="background:var(--ic-new)"></i> New IC</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Right: Canvas ── -->
+    <div class="card" style="padding:.75rem;">
+      <canvas id="canvas" width="800" height="700"></canvas>
+    </div>
+
+  </div><!-- /grid -->
+
+  <!-- ═══════════════ Theory ═══════════════ -->
+  <div class="theory card" style="margin-top:1.5rem;">
+    <h2>📖 Understanding the Slutsky Equation</h2>
+
+    <div class="formula">
+      ∂x₁/∂p₁ &nbsp;=&nbsp; ∂h₁/∂p₁ &nbsp;−&nbsp; x₁ · ∂x₁/∂m
+    </div>
+
+    <p>The <strong>Slutsky equation</strong> decomposes the total effect of a price change on the quantity demanded of a good into two distinct components:</p>
+
+    <details open>
+      <summary>Substitution Effect (∂h₁/∂p₁)</summary>
+      <p>The change in demand due <em>only</em> to the change in relative prices, holding the consumer's utility constant (i.e., staying on the same indifference curve). This effect is <strong>always negative</strong> for a price increase: when x becomes relatively more expensive, the consumer substitutes toward y.</p>
+      <ul>
+        <li>Graphically: movement <strong>along</strong> the original indifference curve from the old optimum to the point where the compensated budget line is tangent.</li>
+        <li>The compensated (Hicksian) budget line has the <em>new</em> price ratio but enough income to reach the <em>old</em> utility level.</li>
+      </ul>
+    </details>
+
+    <details open>
+      <summary>Income Effect (−x₁ · ∂x₁/∂m)</summary>
+      <p>The change in demand due to the change in real purchasing power caused by the price change. When the price of x rises, the consumer's real income falls, which further affects demand.</p>
+      <ul>
+        <li>For a <strong>normal good</strong>: the income effect reinforces the substitution effect (both reduce demand when price rises).</li>
+        <li>For an <strong>inferior good</strong>: the income effect works against the substitution effect.</li>
+        <li>For a <strong>Giffen good</strong>: the income effect dominates the substitution effect, leading to an increase in quantity demanded when price rises (a rare theoretical case).</li>
+      </ul>
+    </details>
+
+    <details>
+      <summary>Cobb-Douglas Utility in this Simulator</summary>
+      <p>This playground uses a <strong>Cobb-Douglas</strong> utility function:</p>
+      <div class="formula">U(x, y) = x<sup>α</sup> · y<sup>(1−α)</sup></div>
+      <p>The Marshallian (ordinary) demand functions are:</p>
+      <div class="formula">x* = α · m / p₁ &emsp;&emsp; y* = (1−α) · m / p₂</div>
+      <p>Because Cobb-Douglas preferences are homothetic, goods are always normal, so the income effect always reinforces the substitution effect for a price increase. Adjust α to change how much the consumer values x relative to y.</p>
+    </details>
+
+    <details>
+      <summary>How to Read the Graph</summary>
+      <ul>
+        <li><strong style="color:var(--budget-old)">Grey line</strong> — Original budget constraint (m = p₁·x + p₂·y).</li>
+        <li><strong style="color:var(--budget-new)">Yellow line</strong> — New budget constraint after the price change.</li>
+        <li><strong style="color:var(--budget-comp)">Orange line</strong> — Compensated budget: new price ratio, but enough income to reach the old utility.</li>
+        <li><strong style="color:var(--ic-old)">Purple curve</strong> — Original indifference curve (utility at the old optimum).</li>
+        <li><strong style="color:var(--ic-new)">Cyan curve</strong> — New indifference curve (utility at the new optimum).</li>
+        <li><strong>Points A → B → C</strong> — A is the original optimum, B is the substitution-only optimum (on compensated budget), C is the final optimum.</li>
+        <li><strong style="color:var(--sub)">Pink arrow (A→B)</strong> — Substitution effect.</li>
+        <li><strong style="color:var(--inc)">Purple arrow (B→C)</strong> — Income effect.</li>
+        <li><strong style="color:var(--total)">Green arrow (A→C)</strong> — Total effect.</li>
+      </ul>
+    </details>
+  </div>
+
+  <footer>
+    Built for learning &amp; exploration &mdash; Slutsky Equation Playground
+  </footer>
+
+</div><!-- /container -->
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- SCRIPT -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<script>
+(() => {
+  "use strict";
+
+  // ── DOM refs ──────────────────────────────────────────────
+  const canvas  = document.getElementById("canvas");
+  const ctx     = canvas.getContext("2d");
+
+  const sIncome = document.getElementById("sIncome");
+  const sPx     = document.getElementById("sPx");
+  const sPxNew  = document.getElementById("sPxNew");
+  const sPy     = document.getElementById("sPy");
+  const sAlpha  = document.getElementById("sAlpha");
+
+  const vIncome = document.getElementById("vIncome");
+  const vPx     = document.getElementById("vPx");
+  const vPxNew  = document.getElementById("vPxNew");
+  const vPy     = document.getElementById("vPy");
+  const vAlpha  = document.getElementById("vAlpha");
+
+  const rTotal  = document.getElementById("rTotal");
+  const rSub    = document.getElementById("rSub");
+  const rInc    = document.getElementById("rInc");
+  const eqTotal = document.getElementById("eqTotal");
+  const eqSub   = document.getElementById("eqSub");
+  const eqInc   = document.getElementById("eqInc");
+
+  // ── Presets ───────────────────────────────────────────────
+  const presets = {
+    normal:    { m: 100, px: 2, pxn: 4,   py: 2, a: 0.50 },
+    inferior:  { m: 80,  px: 2, pxn: 5,   py: 2, a: 0.30 },
+    "big-drop":{ m: 100, px: 6, pxn: 2,   py: 2, a: 0.50 },
+    luxury:    { m: 150, px: 3, pxn: 5,   py: 2, a: 0.75 },
+    necessity: { m: 100, px: 2, pxn: 3.5, py: 2, a: 0.25 },
+  };
+
+  document.querySelectorAll("[data-preset]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const p = presets[btn.dataset.preset];
+      sIncome.value = p.m;  sPx.value = p.px;
+      sPxNew.value  = p.pxn; sPy.value = p.py; sAlpha.value = p.a;
+      update();
+    });
+  });
+
+  // ── Economics helpers ─────────────────────────────────────
+  /** Marshallian demand for x under Cobb-Douglas */
+  const demandX = (a, m, px)      => a * m / px;
+  const demandY = (a, m, py)      => (1 - a) * m / py;
+  /** Utility under Cobb-Douglas */
+  const utility = (x, y, a)       => Math.pow(x, a) * Math.pow(y, 1 - a);
+  /** Expenditure to reach utility u at prices (px, py) */
+  const expenditure = (a, u, px, py) =>
+    u * Math.pow(px / a, a) * Math.pow(py / (1 - a), 1 - a);
+
+  // ── Canvas coordinate helpers ─────────────────────────────
+  let W, H, ox, oy, scaleX, scaleY, maxX, maxY;
+
+  function setupCoords(m, px, py) {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    W = rect.width * dpr;
+    H = rect.height * dpr;
+    canvas.width  = W;
+    canvas.height = H;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    const pad = 60 * dpr;
+    ox = pad;
+    oy = H - pad;
+
+    maxX = Math.max(m / px, m / 0.5) * 1.15;
+    maxY = Math.max(m / py, 200 / py) * 1.15;
+    scaleX = (W - pad * 1.5) / maxX;
+    scaleY = (H - pad * 1.5) / maxY;
+  }
+
+  const toSx = x => ox + x * scaleX;
+  const toSy = y => oy - y * scaleY;
+
+  // ── Drawing helpers ───────────────────────────────────────
+  function drawAxes() {
+    const dpr = window.devicePixelRatio || 1;
+    ctx.strokeStyle = "#334155";
+    ctx.lineWidth = 1 * dpr;
+    ctx.beginPath();
+    ctx.moveTo(ox, 10 * dpr); ctx.lineTo(ox, oy);
+    ctx.lineTo(W - 10 * dpr, oy);
+    ctx.stroke();
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = `${13 * dpr}px system-ui`;
+    ctx.textAlign = "center";
+
+    // x-axis ticks
+    const xStep = niceStep(maxX, 8);
+    for (let v = xStep; v < maxX; v += xStep) {
+      const sx = toSx(v);
+      ctx.fillText(v.toFixed(0), sx, oy + 18 * dpr);
+      ctx.beginPath(); ctx.moveTo(sx, oy); ctx.lineTo(sx, oy + 5 * dpr); ctx.stroke();
+    }
+    // y-axis ticks
+    const yStep = niceStep(maxY, 8);
+    ctx.textAlign = "right";
+    for (let v = yStep; v < maxY; v += yStep) {
+      const sy = toSy(v);
+      ctx.fillText(v.toFixed(0), ox - 8 * dpr, sy + 4 * dpr);
+      ctx.beginPath(); ctx.moveTo(ox, sy); ctx.lineTo(ox - 5 * dpr, sy); ctx.stroke();
+    }
+    // labels
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = `bold ${14 * dpr}px system-ui`;
+    ctx.fillText("Good x", W / 2, oy + 45 * dpr);
+    ctx.save();
+    ctx.translate(18 * dpr, H / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText("Good y", 0, 0);
+    ctx.restore();
+  }
+
+  function niceStep(range, targetTicks) {
+    const rough = range / targetTicks;
+    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+    const res = rough / mag;
+    if (res <= 1.5) return mag;
+    if (res <= 3.5) return 2 * mag;
+    if (res <= 7.5) return 5 * mag;
+    return 10 * mag;
+  }
+
+  function drawBudget(m, px, py, color, dashed) {
+    const dpr = window.devicePixelRatio || 1;
+    const xInt = m / px;
+    const yInt = m / py;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2 * dpr;
+    ctx.setLineDash(dashed ? [8 * dpr, 6 * dpr] : []);
+    ctx.beginPath();
+    ctx.moveTo(toSx(0), toSy(yInt));
+    ctx.lineTo(toSx(xInt), toSy(0));
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function drawIC(a, u, color) {
+    const dpr = window.devicePixelRatio || 1;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5 * dpr;
+    ctx.beginPath();
+    let started = false;
+    for (let sx = ox; sx < W; sx += 2) {
+      const x = (sx - ox) / scaleX;
+      if (x <= 0.01) continue;
+      const y = Math.pow(u / Math.pow(x, a), 1 / (1 - a));
+      if (y < 0 || y > maxY * 1.5) continue;
+      const sy = toSy(y);
+      if (!started) { ctx.moveTo(sx, sy); started = true; }
+      else ctx.lineTo(sx, sy);
+    }
+    ctx.stroke();
+  }
+
+  function drawPoint(x, y, label, color) {
+    const dpr = window.devicePixelRatio || 1;
+    const sx = toSx(x), sy = toSy(y);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 6 * dpr, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineWidth = 2 * dpr;
+    ctx.stroke();
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = `bold ${13 * dpr}px system-ui`;
+    ctx.textAlign = "left";
+    ctx.fillText(label, sx + 10 * dpr, sy - 8 * dpr);
+    ctx.font = `${11 * dpr}px system-ui`;
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText(`(${x.toFixed(1)}, ${y.toFixed(1)})`, sx + 10 * dpr, sy + 8 * dpr);
+  }
+
+  function drawArrow(x1, y1, x2, y2, color, offsetY) {
+    const dpr = window.devicePixelRatio || 1;
+    const sy1 = toSy(y1) + offsetY * dpr;
+    const sy2 = toSy(y2) + offsetY * dpr;
+    const sx1 = toSx(x1), sx2 = toSx(x2);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3 * dpr;
+    ctx.beginPath();
+    ctx.moveTo(sx1, sy1);
+    ctx.lineTo(sx2, sy2);
+    ctx.stroke();
+
+    // arrowhead
+    const angle = Math.atan2(sy2 - sy1, sx2 - sx1);
+    const hl = 12 * dpr;
+    ctx.beginPath();
+    ctx.moveTo(sx2, sy2);
+    ctx.lineTo(sx2 - hl * Math.cos(angle - 0.35), sy2 - hl * Math.sin(angle - 0.35));
+    ctx.lineTo(sx2 - hl * Math.cos(angle + 0.35), sy2 - hl * Math.sin(angle + 0.35));
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // ── Main update ───────────────────────────────────────────
+  function update() {
+    const m   = +sIncome.value;
+    const px  = +sPx.value;
+    const pxn = +sPxNew.value;
+    const py  = +sPy.value;
+    const a   = +sAlpha.value;
+
+    // display slider values
+    vIncome.textContent = m;
+    vPx.textContent     = px.toFixed(1);
+    vPxNew.textContent  = pxn.toFixed(1);
+    vPy.textContent     = py.toFixed(1);
+    vAlpha.textContent  = a.toFixed(2);
+
+    // 1. Original optimum (A)
+    const xA = demandX(a, m, px);
+    const yA = demandY(a, m, py);
+    const uA = utility(xA, yA, a);
+
+    // 2. New optimum (C) — after price change
+    const xC = demandX(a, m, pxn);
+    const yC = demandY(a, m, py);
+    const uC = utility(xC, yC, a);
+
+    // 3. Compensated optimum (B) — Slutsky (Hicksian) compensation
+    const mComp = expenditure(a, uA, pxn, py);
+    const xB = demandX(a, mComp, pxn);
+    const yB = demandY(a, mComp, py);
+
+    // Effects
+    const subEffect   = xB - xA;   // substitution
+    const incEffect   = xC - xB;   // income
+    const totalEffect = xC - xA;   // total
+
+    // ── Draw ────────────────────────────────────────────────
+    setupCoords(Math.max(m, mComp), Math.min(px, pxn, 0.5), py);
+    ctx.clearRect(0, 0, W, H);
+    drawAxes();
+
+    // Budget lines
+    drawBudget(m, px, py, "#64748b", false);     // original
+    drawBudget(m, pxn, py, "#facc15", false);     // new
+    drawBudget(mComp, pxn, py, "#fb923c", true);  // compensated
+
+    // Indifference curves
+    drawIC(a, uA, "#818cf8");  // old utility
+    if (Math.abs(uA - uC) > 0.01) {
+      drawIC(a, uC, "#22d3ee");  // new utility
+    }
+
+    // Effect arrows (horizontal, at a convenient y-offset below the axis line)
+    const arrowBaseY = Math.min(yA, yB, yC) * 0.35;
+    if (Math.abs(totalEffect) > 0.05) {
+      drawArrow(xA, arrowBaseY, xC, arrowBaseY, "#34d399", 40);   // total (bottom)
+      drawArrow(xA, arrowBaseY, xB, arrowBaseY, "#f472b6", 20);   // substitution
+      drawArrow(xB, arrowBaseY, xC, arrowBaseY, "#a78bfa", 0);    // income
+    }
+
+    // Points
+    drawPoint(xA, yA, "A (original)", "#e2e8f0");
+    drawPoint(xB, yB, "B (substitution)", "#f472b6");
+    drawPoint(xC, yC, "C (new)", "#22d3ee");
+
+    // ── Readouts ────────────────────────────────────────────
+    const fmt = v => (v >= 0 ? "+" : "") + v.toFixed(2);
+    rTotal.textContent = fmt(totalEffect);
+    rSub.textContent   = fmt(subEffect);
+    rInc.textContent   = fmt(incEffect);
+    eqTotal.textContent = `Total: ${fmt(totalEffect)}`;
+    eqSub.textContent   = `Sub: ${fmt(subEffect)}`;
+    eqInc.textContent   = `Inc: ${fmt(incEffect)}`;
+  }
+
+  // ── Event listeners ───────────────────────────────────────
+  [sIncome, sPx, sPxNew, sPy, sAlpha].forEach(s =>
+    s.addEventListener("input", update)
+  );
+
+  window.addEventListener("resize", update);
+  update();
+})();
+</script>
+</body>
+</html>

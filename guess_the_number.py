@@ -2,11 +2,12 @@
 
 Run: python3 guess_the_number.py
 """
+
 import random
 import time
 
 
-def startup_animation():
+def startup_animation() -> None:
     banner = r"""
   ____                       _   _            _   _                 _
  / ___|_   _  ___  ___ ___  | |_| |__   ___  | \ | |_   _ _ __ ___ | |__   ___ _ __
@@ -21,46 +22,46 @@ def startup_animation():
     # Print banner letter by letter
     print()
     for char in banner:
-        print(char, end='', flush=True)
+        print(char, end="", flush=True)
         time.sleep(0.01)
 
     time.sleep(0.3)
 
     # Animated separator
     for char in separators[0]:
-        print(char, end='', flush=True)
+        print(char, end="", flush=True)
         time.sleep(0.05)
     print()
 
     # Animated title — slower for dramatic effect
     print()
     for char in title:
-        print(char, end='', flush=True)
+        print(char, end="", flush=True)
         time.sleep(0.1)
     print()
 
     # Animated subtitle — slower for dramatic effect
     for char in subtitle:
-        print(char, end='', flush=True)
+        print(char, end="", flush=True)
         time.sleep(0.08)
     print()
 
     time.sleep(0.3)
     for char in separators[1]:
-        print(char, end='', flush=True)
+        print(char, end="", flush=True)
         time.sleep(0.05)
     print("\n")
 
     # Suspenseful countdown
     for i in range(3, 0, -1):
-        print(f"  ⏳  Starting in {i}...", end='\r', flush=True)
+        print(f"  ⏳  Starting in {i}...", end="\r", flush=True)
         time.sleep(1.0)
     print("  🚀  Get ready!             ")
     time.sleep(0.6)
     print()
 
 
-def choose_difficulty():
+def choose_difficulty() -> tuple[int, int]:
     """Prompt the player to select a difficulty level.
 
     Each level is a tuple of (max_number, max_guesses).
@@ -68,10 +69,10 @@ def choose_difficulty():
     """
     # Map option key -> (upper bound of secret number, allowed guesses)
     choices = {
-        "1": (10, 6),    # Easy:    small range, few guesses
-        "2": (40, 7),    # Medium:  moderate range and guesses (default)
+        "1": (10, 6),  # Easy:    small range, few guesses
+        "2": (40, 7),  # Medium:  moderate range and guesses (default)
         "3": (100, 10),  # Hard:    wider range, more guesses needed
-        "4": (1000, 15), # Extreme: very wide range, maximum challenge
+        "4": (1000, 15),  # Extreme: very wide range, maximum challenge
     }
     print("Choose difficulty:")
     print("  1) Easy    (1-10,   6 guesses)")
@@ -85,7 +86,7 @@ def choose_difficulty():
         print("Please enter 1, 2, 3 or 4.")
 
 
-def play_round():
+def play_round() -> tuple[bool, int | None]:
     """Run a single round of the game.
 
     Returns:
@@ -110,7 +111,7 @@ def play_round():
         guesses += 1
 
         if guess == secret:
-            print(f"Correct! You found it in {guesses} guess{'es' if guesses!=1 else ''}.")
+            print(f"Correct! You found it in {guesses} guess{'es' if guesses != 1 else ''}.")
             return True, guesses
         # Give a directional hint so the player can narrow down the range
         if guess < secret:
@@ -122,23 +123,23 @@ def play_round():
     return False, None
 
 
-def main():
+def main() -> None:
     """Entry point: loop through rounds and track the player's best score."""
     startup_animation()
     print("--- Guess the Number ---")
     best = None  # Fewest guesses used to win across all rounds
     while True:
         won, guesses = play_round()
-        if won:
+        if won and guesses is not None:
             # Update best score if this round was faster
             if best is None or guesses < best:
                 best = guesses
                 print(f"New best: {best} guesses!")
         again = input("Play again? (y/n): ").strip().lower()
-        if not again or again[0] != 'y':
+        if not again or again[0] != "y":
             print("Thanks for playing!")
             break
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

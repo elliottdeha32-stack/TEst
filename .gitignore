@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.env
+.venv
+venv/
+env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+*.egg
+
+# Tests
+.pytest_cache/
+.coverage
+
+# MyPy
+.mypy_cache/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+
+# Byte-compiled / optimized / generated files
+*.pyc
+*.pyo
+
+# Cache
+.cache/

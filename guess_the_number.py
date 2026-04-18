@@ -6,11 +6,17 @@ import random
 
 
 def choose_difficulty():
+    """Prompt the player to select a difficulty level.
+
+    Each level is a tuple of (max_number, max_guesses).
+    Returns the chosen (max_number, max_guesses) pair.
+    """
+    # Map option key -> (upper bound of secret number, allowed guesses)
     choices = {
-        "1": (10, 6),    # (max_number, max_guesses)
-        "2": (40, 7),
-        "3": (100, 10),
-        "4": (1000, 15),
+        "1": (10, 6),    # Easy:    small range, few guesses
+        "2": (40, 7),    # Medium:  moderate range and guesses (default)
+        "3": (100, 10),  # Hard:    wider range, more guesses needed
+        "4": (1000, 15), # Extreme: very wide range, maximum challenge
     }
     print("Choose difficulty:")
     print("  1) Easy    (1-10,   6 guesses)")
@@ -25,7 +31,15 @@ def choose_difficulty():
 
 
 def play_round():
+    """Run a single round of the game.
+
+    Returns:
+        (won, guesses): won is True if the player guessed correctly,
+                        guesses is the number of attempts used (or None on loss).
+    """
     max_num, max_guesses = choose_difficulty()
+
+    # Pick a random secret number within the difficulty range
     secret = random.randint(1, max_num)
     print(f"I'm thinking of a number between 1 and {max_num}.")
     guesses = 0
@@ -35,6 +49,7 @@ def play_round():
         try:
             guess = int(input(f"Guess ({remaining} left): "))
         except ValueError:
+            # Re-prompt without counting the invalid attempt
             print("Please enter a whole number.")
             continue
         guesses += 1
@@ -42,6 +57,7 @@ def play_round():
         if guess == secret:
             print(f"Correct! You found it in {guesses} guess{'es' if guesses!=1 else ''}.")
             return True, guesses
+        # Give a directional hint so the player can narrow down the range
         if guess < secret:
             print("Too low.")
         else:
@@ -52,11 +68,13 @@ def play_round():
 
 
 def main():
+    """Entry point: loop through rounds and track the player's best score."""
     print("--- Guess the Number ---")
-    best = None
+    best = None  # Fewest guesses used to win across all rounds
     while True:
         won, guesses = play_round()
         if won:
+            # Update best score if this round was faster
             if best is None or guesses < best:
                 best = guesses
                 print(f"New best: {best} guesses!")

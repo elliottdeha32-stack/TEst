@@ -3,6 +3,61 @@
 Run: python3 guess_the_number.py
 """
 import random
+import time
+
+
+def startup_animation():
+    banner = r"""
+  ____                       _   _            _   _                 _
+ / ___|_   _  ___  ___ ___  | |_| |__   ___  | \ | |_   _ _ __ ___ | |__   ___ _ __
+| |  _| | | |/ _ \/ __/ __| | __| '_ \ / _ \ |  \| | | | | '_ ` _ \| '_ \ / _ \ '__|
+| |_| | |_| |  __/\__ \__ \ | |_| | | |  __/ | |\  | |_| | | | | | | |_) |  __/ |
+ \____|\__,_|\___||___/___/  \__|_| |_|\___| |_| \_|\__,_|_| |_| |_|_.__/ \___|_|
+"""
+    separators = ["★  ★  ★  ★  ★  ★  ★  ★  ★  ★  ★  ★", "~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~"]
+    title = "       🎯  GUESS THE NUMBER  🎯"
+    subtitle = "   Can YOU find the secret number in time?"
+
+    # Print banner letter by letter
+    print()
+    for char in banner:
+        print(char, end='', flush=True)
+        time.sleep(0.01)
+
+    time.sleep(0.3)
+
+    # Animated separator
+    for char in separators[0]:
+        print(char, end='', flush=True)
+        time.sleep(0.05)
+    print()
+
+    # Animated title — slower for dramatic effect
+    print()
+    for char in title:
+        print(char, end='', flush=True)
+        time.sleep(0.1)
+    print()
+
+    # Animated subtitle — slower for dramatic effect
+    for char in subtitle:
+        print(char, end='', flush=True)
+        time.sleep(0.08)
+    print()
+
+    time.sleep(0.3)
+    for char in separators[1]:
+        print(char, end='', flush=True)
+        time.sleep(0.05)
+    print("\n")
+
+    # Suspenseful countdown
+    for i in range(3, 0, -1):
+        print(f"  ⏳  Starting in {i}...", end='\r', flush=True)
+        time.sleep(1.0)
+    print("  🚀  Get ready!             ")
+    time.sleep(0.6)
+    print()
 
 
 def choose_difficulty():
@@ -69,6 +124,7 @@ def play_round():
 
 def main():
     """Entry point: loop through rounds and track the player's best score."""
+    startup_animation()
     print("--- Guess the Number ---")
     best = None  # Fewest guesses used to win across all rounds
     while True:

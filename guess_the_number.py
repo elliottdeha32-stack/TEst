@@ -8,7 +8,7 @@ import random
 def choose_difficulty():
     choices = {
         "1": (10, 6),   # (max_number, max_guesses)
-        "2": (50, 7),
+        "2": (40, 7),
         "3": (100, 10),
     }
     print("Choose difficulty:")

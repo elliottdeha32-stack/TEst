@@ -7,26 +7,56 @@ import time
 
 
 def startup_animation():
-    title = "=== GUESS THE NUMBER ==="
-    subtitle = "     A Number Guessing Game"
+    banner = r"""
+  ____                       _   _            _   _                 _
+ / ___|_   _  ___  ___ ___  | |_| |__   ___  | \ | |_   _ _ __ ___ | |__   ___ _ __
+| |  _| | | |/ _ \/ __/ __| | __| '_ \ / _ \ |  \| | | | | '_ ` _ \| '_ \ / _ \ '__|
+| |_| | |_| |  __/\__ \__ \ | |_| | | |  __/ | |\  | |_| | | | | | | |_) |  __/ |
+ \____|\__,_|\___||___/___/  \__|_| |_|\___| |_| \_|\__,_|_| |_| |_|_.__/ \___|_|
+"""
+    separators = ["★  ★  ★  ★  ★  ★  ★  ★  ★  ★  ★  ★", "~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~"]
+    title = "       🎯  GUESS THE NUMBER  🎯"
+    subtitle = "   Can YOU find the secret number in time?"
 
-    # Animate title character by character
-    print("\n")
-    for char in title:
+    # Print banner letter by letter
+    print()
+    for char in banner:
+        print(char, end='', flush=True)
+        time.sleep(0.01)
+
+    time.sleep(0.3)
+
+    # Animated separator
+    for char in separators[0]:
         print(char, end='', flush=True)
         time.sleep(0.05)
     print()
+
+    # Animated title — slower for dramatic effect
+    print()
+    for char in title:
+        print(char, end='', flush=True)
+        time.sleep(0.1)
+    print()
+
+    # Animated subtitle — slower for dramatic effect
     for char in subtitle:
         print(char, end='', flush=True)
-        time.sleep(0.04)
+        time.sleep(0.08)
+    print()
+
+    time.sleep(0.3)
+    for char in separators[1]:
+        print(char, end='', flush=True)
+        time.sleep(0.05)
     print("\n")
 
-    # Countdown
+    # Suspenseful countdown
     for i in range(3, 0, -1):
-        print(f"  Starting in {i}...", end='\r', flush=True)
-        time.sleep(0.7)
-    print("  Get ready!         ")
-    time.sleep(0.4)
+        print(f"  ⏳  Starting in {i}...", end='\r', flush=True)
+        time.sleep(1.0)
+    print("  🚀  Get ready!             ")
+    time.sleep(0.6)
     print()
 
 

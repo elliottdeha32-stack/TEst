@@ -7,19 +7,21 @@ import random
 
 def choose_difficulty():
     choices = {
-        "1": (10, 6),   # (max_number, max_guesses)
+        "1": (10, 6),    # (max_number, max_guesses)
         "2": (40, 7),
         "3": (100, 10),
+        "4": (1000, 15),
     }
     print("Choose difficulty:")
-    print("  1) Easy   (1-10, 6 guesses)")
-    print("  2) Medium (1-50, 7 guesses)")
-    print("  3) Hard   (1-100, 10 guesses)")
+    print("  1) Easy    (1-10,   6 guesses)")
+    print("  2) Medium  (1-50,   7 guesses)")
+    print("  3) Hard    (1-100, 10 guesses)")
+    print("  4) Extreme (1-1000, 15 guesses)")
     while True:
-        choice = input("Select 1, 2 or 3 (default 2): ").strip() or "2"
+        choice = input("Select 1, 2, 3 or 4 (default 2): ").strip() or "2"
         if choice in choices:
             return choices[choice]
-        print("Please enter 1, 2 or 3.")
+        print("Please enter 1, 2, 3 or 4.")
 
 
 def play_round():
